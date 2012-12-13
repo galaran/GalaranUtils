@@ -29,33 +29,58 @@ public class Messaging {
     }
 
     public static void send(CommandSender sender, String message, Object... params) {
+        send(chatPrefix, sender, message, params);
+    }
+
+    public static void sendNoPrefix(CommandSender sender, String message, Object... params) {
+        send("", sender, message, params);
+    }
+
+    private static void send(String prefix, CommandSender sender, String message, Object... params) {
         String decorated = StringUtils.decorateString(message, params);
         if (!decorated.equals("$suppress")) {
-            sender.sendMessage(chatPrefix + decorated);
+            sender.sendMessage(prefix + decorated);
         }
     }
 
-    public static void sendPlayerIfOnline(String playerName, String message, Object... params) {
+    /** Does nothing, if player with specified name is not online */
+    public static void send(String playerName, String message, Object... params) {
         Player player = Bukkit.getPlayerExact(playerName);
         if (player != null) {
             send(player, message, params);
         }
     }
 
-    public static void broadcastServer(String message, Object... params) {
-        String decorated = StringUtils.decorateString(message, params);
-        if (!decorated.equals("$suppress")) {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "say " + decorated);
+    /** Does nothing, if player with specified name is not online */
+    public static void sendNoPrefix(String playerName, String message, Object... params) {
+        Player player = Bukkit.getPlayerExact(playerName);
+        if (player != null) {
+            sendNoPrefix(player, message, params);
         }
     }
 
-    public static void broadcastLoc(Location loc, double radius, String message, Object... params) {
+    public static void broadcast(Location loc, double radius, String message, Object... params) {
+        broadcast(chatPrefix, loc, radius, message, params);
+    }
+
+    public static void broadcastNoPrefix(Location loc, double radius, String message, Object... params) {
+        broadcast("", loc, radius, message, params);
+    }
+
+    private static void broadcast(String prefix, Location loc, double radius, String message, Object... params) {
         for (Player curPlayer : Bukkit.getOnlinePlayers()) {
             Location curPlayerLoc = curPlayer.getLocation();
             if (!curPlayerLoc.getWorld().equals(loc.getWorld())) continue;
             if (curPlayerLoc.distance(loc) <= radius) {
-                send(curPlayer, message, params);
+                send(prefix, curPlayer, message, params);
             }
+        }
+    }
+
+    public static void broadcastServerNoPrefix(String message, Object... params) {
+        String decorated = StringUtils.decorateString(message, params);
+        if (!decorated.equals("$suppress")) {
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "say " + decorated);
         }
     }
 
