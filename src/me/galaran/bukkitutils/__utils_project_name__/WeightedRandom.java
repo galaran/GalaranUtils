@@ -1,8 +1,11 @@
 package me.galaran.bukkitutils.__utils_project_name__;
 
 import java.util.Map;
+import java.util.Random;
 
 public class WeightedRandom {
+
+    private static final Random rnd = new Random();
 
     public static <V> V choose(Map<V, ? extends Number> map) {
         double weightSum = 0;
@@ -10,7 +13,7 @@ public class WeightedRandom {
             weightSum += entry.getValue().doubleValue();
         }
 
-        double num = Messaging.random.nextDouble() * weightSum;
+        double num = rnd.nextDouble() * weightSum;
         for (Map.Entry<V, ? extends Number> entry : map.entrySet()) {
             double entryWeight = entry.getValue().doubleValue();
             if (num < entryWeight) {
