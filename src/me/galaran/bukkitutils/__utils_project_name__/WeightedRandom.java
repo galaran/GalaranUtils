@@ -10,7 +10,7 @@ public class WeightedRandom {
             weightSum += entry.getValue().doubleValue();
         }
 
-        double num = GUtils.random.nextDouble() * weightSum;
+        double num = Messaging.random.nextDouble() * weightSum;
         for (Map.Entry<V, ? extends Number> entry : map.entrySet()) {
             double entryWeight = entry.getValue().doubleValue();
             if (num < entryWeight) {

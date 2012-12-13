@@ -1,4 +1,4 @@
-package me.galaran.bukkitutils.__utils_project_name__;
+package me.galaran.bukkitutils.__utils_project_name__.nms;
 
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CbUtils {
+public class NmsUtils {
 
     /** Bukkit's World.dropItem() drops stack with null NBT tag, this method not */
     public static void dropStackSafe(ItemStack stack, Location loc) {

@@ -3,14 +3,14 @@ package me.galaran.bukkitutils.__utils_project_name__;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.util.BlockVector;
 
+/** Immutable */
 public class BlockLocation implements Cloneable {
 
-    private World world;
-    private int x;
-    private int y;
-    private int z;
+    private final World world;
+    private final int x;
+    private final int y;
+    private final int z;
 
     public BlockLocation(World world, int x, int y, int z) {
         this.world = world;
@@ -35,34 +35,12 @@ public class BlockLocation implements Cloneable {
         return new Location(world, x, y, z);
     }
 
-    /**
-     * @return this BlockLocation
-     */
-    public BlockLocation add(BlockVector vec) {
-        x += vec.getBlockX();
-        y += vec.getBlockY();
-        z += vec.getBlockZ();
-        return this;
-    }
-
-    /**
-     * @return this BlockLocation
-     */
     public BlockLocation add(int dx, int dy, int dz) {
-        x += dx;
-        y += dy;
-        z += dz;
-        return this;
+        return new BlockLocation(world, x + dx, y + dy, z + dz);
     }
 
-    /**
-     * @return this BlockLocation
-     */
-    public BlockLocation subtract(BlockVector vec) {
-        x -= vec.getBlockX();
-        y -= vec.getBlockY();
-        z -= vec.getBlockZ();
-        return this;
+    public BlockLocation subtract(int dx, int dy, int dz) {
+        return new BlockLocation(world, x - dx, y - dy, z - dz);
     }
 
     @Override
@@ -75,9 +53,8 @@ public class BlockLocation implements Cloneable {
         if (world != null ? !world.equals(that.world) : that.world != null) return false;
         if (x != that.x) return false;
         if (y != that.y) return false;
-        if (z != that.z) return false;
+        return z == that.z;
 
-        return true;
     }
 
     @Override
@@ -102,31 +79,15 @@ public class BlockLocation implements Cloneable {
         return world;
     }
 
-    public void setWorld(World world) {
-        this.world = world;
-    }
-
     public int getX() {
         return x;
-    }
-
-    public void setX(int x) {
-        this.x = x;
     }
 
     public int getY() {
         return y;
     }
 
-    public void setY(int y) {
-        this.y = y;
-    }
-
     public int getZ() {
         return z;
-    }
-
-    public void setZ(int z) {
-        this.z = z;
     }
 }

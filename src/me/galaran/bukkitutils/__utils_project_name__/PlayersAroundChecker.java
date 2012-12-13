@@ -17,16 +17,14 @@ public class PlayersAroundChecker {
 
     public PlayersAroundChecker(Plugin plugin, int period) {
         PlayersLocPoller poller = new PlayersLocPoller();
-        poller.run(); // immediately
 
+        poller.run();
         Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, poller, period, period);
     }
 
     /** Thread unsafe */
     public boolean isPlayerNearby(Location loc, int radius) {
-        if (playersLoc.isEmpty()) {
-            return false;
-        }
+        if (playersLoc.isEmpty()) return false;
 
         Integer cachedMinDist = minDistanceCache.get(loc);
         if (cachedMinDist == null) {
