@@ -3,11 +3,11 @@ package me.galaran.bukkitutils.__utils_project_name__;
 import java.util.Map;
 import java.util.Random;
 
-public class WeightedRandom {
+public class RandomUtils {
 
-    private static final Random rnd = new Random();
+    public static final Random rnd = new Random();
 
-    public static <V> V choose(Map<V, ? extends Number> map) {
+    public static <V> V weightedChoose(Map<V, ? extends Number> map) {
         double weightSum = 0;
         for (Map.Entry<V, ? extends Number> entry : map.entrySet()) {
             weightSum += entry.getValue().doubleValue();
