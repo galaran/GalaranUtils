@@ -1,0 +1,55 @@
+package me.galaran.bukkitutils.__utils_project_name__.text;
+
+import com.google.common.collect.ImmutableMap;
+import org.bukkit.ChatColor;
+import org.bukkit.plugin.Plugin;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class TranslationLang extends TranslationBase {
+
+    private final Plugin plugin;
+    private ImmutableMap<String, String> curTranslation;
+
+    public TranslationLang(Plugin plugin, String defaultLang) {
+        super("/" + defaultLang + ".lang");
+        this.plugin = plugin;
+    }
+
+    public void reload(String language) {
+        String langFileName = language + ".lang";
+        File langFile = new File(plugin.getDataFolder(), langFileName);
+
+        if (!langFile.isFile()) {
+            plugin.saveResource(langFileName, false);
+            if (!langFile.isFile()) {
+                curTranslation = ImmutableMap.of();
+                plugin.getLogger().warning("No lang file for " + language + ". Using defaults");
+                return;
+            }
+        }
+
+        try {
+            curTranslation = loadProperties(new FileInputStream(langFile));
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+        if (curTranslation.size() < defaultTranslation.size()) {
+            plugin.getLogger().warning("Lang " + language + " missing some entries. Defaults will be used");
+        }
+    }
+
+    public String getString(String key) {
+        String result = curTranslation.get(key);
+        if (result == null) {
+            result = defaultTranslation.get(key);
+            if (result == null) {
+                return missingKey(key);
+            }
+        }
+        return result;
+    }
+}

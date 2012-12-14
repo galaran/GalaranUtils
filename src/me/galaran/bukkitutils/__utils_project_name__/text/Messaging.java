@@ -10,25 +10,28 @@ import org.bukkit.entity.Player;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+utils.no-player: &cNo player with name &3$1
+utils.no-player-matching: &cNo player with name matching &3$1
+utils.no-world: &cWorld $1 not loaded
+utils.cs-not-player: &cThis command can be executed only by a player
+utils.no-perm: &cYou don't have permission
+*/
+
 public class Messaging {
 
     private static Logger log;
     private static String chatPrefix;
 
+    public static interface Translation {
+        String getString(String key);
+    }
     private static Translation translation;
 
     public static void init(Logger logger, String chatPrefixx, Translation tr) {
         log = logger;
-        chatPrefix = chatPrefixx;
-
+        chatPrefix = chatPrefixx + ChatColor.WHITE;
         translation = tr;
-        translation.addDefaults(
-                "utils.no-player", "&cNo player with name &3$1",
-                "utils.no-player-matching", "&cNo player with name matching &3$1",
-                "utils.no-world", "&cWorld $1 not loaded",
-                "utils.cs-not-player", "&cThis command can be executed only by a player",
-                "utils.no-perm", "&cYou don't have permission"
-        );
     }
 
     public static void log(Level level, String message, Object... params) {
@@ -38,6 +41,13 @@ public class Messaging {
 
     public static void log(String message, Object... params) {
         log(Level.INFO, message, params);
+    }
+
+    public static void sendRaw(CommandSender sender, String raw, Object... params) {
+        String decorated = StringUtils.decorateString(raw, params);
+        if (!decorated.equals("$suppress")) {
+            sender.sendMessage(chatPrefix + decorated);
+        }
     }
 
     public static void send(CommandSender sender, String key, Object... params) {
