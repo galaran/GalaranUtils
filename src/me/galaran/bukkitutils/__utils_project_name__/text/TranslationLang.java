@@ -23,10 +23,11 @@ public class TranslationLang extends TranslationBase {
         File langFile = new File(plugin.getDataFolder(), langFileName);
 
         if (!langFile.isFile()) {
-            plugin.saveResource(langFileName, false);
-            if (!langFile.isFile()) {
+            try {
+                plugin.saveResource(langFileName, false);
+            } catch (IllegalArgumentException ex) {
                 curTranslation = ImmutableMap.of();
-                plugin.getLogger().warning("No lang file for " + language + ". Using defaults");
+                plugin.getLogger().warning("No such lang: " + language + ". Using default");
                 return;
             }
         }

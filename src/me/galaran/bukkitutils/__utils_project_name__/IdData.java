@@ -43,14 +43,17 @@ public class IdData {
     }
 
     public boolean matches(MaterialData matData) {
+        if (matData == null) return false;
         return id == matData.getItemTypeId() && data == (short) matData.getData();
     }
 
     public boolean matches(ItemStack stack) {
+        if (stack == null) return false;
         return id == stack.getTypeId() && data == stack.getDurability();
     }
 
     public boolean matches(Block block) {
+        if (block == null) return false;
         return id == block.getTypeId() && data == (short) block.getData();
     }
 
