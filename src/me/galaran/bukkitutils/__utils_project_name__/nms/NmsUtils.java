@@ -1,5 +1,6 @@
 package me.galaran.bukkitutils.__utils_project_name__.nms;
 
+import net.minecraft.server.NBTTagCompound;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -48,5 +49,46 @@ public class NmsUtils {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return item lore or null if none
+     */
+    public static String getLore(ItemStack stack) {
+        if (stack instanceof CraftItemStack) {
+            NBTTagCompound tag = ((CraftItemStack) stack).getHandle().tag;
+            if (tag != null && tag.hasKey("display") && tag.getCompound("display").hasKey("Name")) {
+                return tag.getCompound("display").getString("Name");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param lore item lore or null to clear
+     * @return result stack
+     */
+    public static ItemStack setLore(ItemStack stack, String lore) {
+        net.minecraft.server.ItemStack nmsStack = CraftItemStack.createNMSItemStack(stack);
+        NBTTagCompound tag = nmsStack.tag;
+
+        if (lore == null) {
+            if (tag != null && tag.hasKey("display")) {
+                tag.getCompound("display").remove("Name");
+            }
+        } else {
+            if (tag == null) {
+                nmsStack.tag = new NBTTagCompound();
+                tag = nmsStack.tag;
+            }
+
+            if (!tag.hasKey("display")) {
+                tag.setCompound("display", new NBTTagCompound());
+            }
+
+            tag.getCompound("display").setString("Name", lore);
+        }
+
+        return new CraftItemStack(nmsStack);
     }
 }
