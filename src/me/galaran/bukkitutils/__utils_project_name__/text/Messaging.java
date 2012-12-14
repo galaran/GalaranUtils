@@ -1,6 +1,5 @@
-package me.galaran.bukkitutils.__utils_project_name__.messaging;
+package me.galaran.bukkitutils.__utils_project_name__.text;
 
-import me.galaran.bukkitutils.__utils_project_name__.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,12 +17,10 @@ public class Messaging {
 
     private static Translation translation;
 
-    public static void init(Logger logger, String chatPrefixx) {
+    public static void init(Logger logger, String chatPrefixx, Translation tr) {
         log = logger;
         chatPrefix = chatPrefixx;
-    }
 
-    public static void setTranslation(Translation tr) {
         translation = tr;
         translation.addDefaults(
                 "utils.no-player", "&cNo player with name &3$1",

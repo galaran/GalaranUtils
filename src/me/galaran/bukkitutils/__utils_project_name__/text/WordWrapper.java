@@ -1,4 +1,4 @@
-package me.galaran.bukkitutils.__utils_project_name__;
+package me.galaran.bukkitutils.__utils_project_name__.text;
 
 import java.util.ArrayList;
 import java.util.List;

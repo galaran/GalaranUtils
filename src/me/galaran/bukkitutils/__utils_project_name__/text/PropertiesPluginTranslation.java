@@ -1,4 +1,4 @@
-package me.galaran.bukkitutils.__utils_project_name__.messaging;
+package me.galaran.bukkitutils.__utils_project_name__.text;
 
 import org.bukkit.plugin.Plugin;
 
