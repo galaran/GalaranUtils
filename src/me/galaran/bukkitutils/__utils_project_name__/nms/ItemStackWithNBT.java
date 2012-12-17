@@ -2,6 +2,9 @@ package me.galaran.bukkitutils.__utils_project_name__.nms;
 
 import net.minecraft.server.NBTBase;
 import net.minecraft.server.NBTTagCompound;
+import net.minecraft.server.NBTTagList;
+import net.minecraft.server.NBTTagString;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -12,9 +15,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,28 +33,90 @@ public class ItemStackWithNBT implements ConfigurationSerializable {
         return new CraftItemStack(nmsStack);
     }
 
+    public ItemStack getBukkitStackCopy() {
+        return new CraftItemStack(nmsStack.cloneItemStack());
+    }
+
     /**
-     * @return item lore or null if none
+     * @return stack name or null if none
      */
-    public String getLore() {
-        NBTTagCompound tag = nmsStack.tag;
-        if (tag != null && tag.hasKey("display") && tag.getCompound("display").hasKey("Name")) {
-            return tag.getCompound("display").getString("Name");
+    public String getName() {
+        NBTTagCompound displayTag = getDisplayTag(false);
+        if (displayTag != null && displayTag.hasKey("Name")) {
+            return displayTag.getString("Name");
         }
         return null;
     }
 
     /**
-     * @param lore item lore or null to clear
+     * @param newName new stack name or null to clear
      */
-    public void setLore(String lore) {
-        NBTTagCompound tag = nmsStack.tag;
-
-        if (lore == null) {
-            if (tag != null && tag.hasKey("display")) {
-                tag.getCompound("display").remove("Name");
+    public void setName(String newName) {
+        if (newName == null) {
+            NBTTagCompound displayTag = getDisplayTag(false);
+            if (displayTag != null) {
+                displayTag.remove("Name");
             }
         } else {
+            getDisplayTag(true).setString("Name", newName);
+        }
+    }
+
+    /**
+     * @return stack lore or null if none
+     */
+    public String[] getLore() {
+        NBTTagCompound displayTag = getDisplayTag(false);
+        if (displayTag != null && displayTag.hasKey("Lore")) {
+            NBTTagList loreList = displayTag.getList("Lore");
+
+            String[] result = new String[loreList.size()];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = ((NBTTagString) loreList.get(i)).data;
+            }
+            return result;
+        }
+        return null;
+    }
+
+    /**
+     * @param newLore new stack lore or null to clear
+     */
+    public void setLore(Iterable<String> newLore) {
+        if (newLore == null) {
+            NBTTagCompound displayTag = getDisplayTag(false);
+            if (displayTag != null) {
+                displayTag.remove("Lore");
+            }
+        } else {
+            NBTTagList newLoreList = new NBTTagList("Lore");
+            for (String loreLine : newLore) {
+                newLoreList.add(new NBTTagString("LoreLine", loreLine));
+            }
+            getDisplayTag(true).set("Lore", newLoreList);
+        }
+    }
+
+    /**
+     * @param loreLine new lore line (not null)
+     */
+    public void addLore(String loreLine) {
+        Validate.notNull(loreLine);
+
+        NBTTagCompound displayTag = getDisplayTag(true);
+        NBTTagList loreList;
+        if (displayTag.hasKey("Lore")) {
+            loreList = displayTag.getList("Lore");
+        } else {
+            loreList = new NBTTagList("Lore");
+            displayTag.set("Lore", loreList);
+        }
+        loreList.add(new NBTTagString("LoreLine", loreLine));
+    }
+
+    private NBTTagCompound getDisplayTag(boolean create) {
+        NBTTagCompound tag = nmsStack.tag;
+        if (create) {
             if (tag == null) {
                 tag = new NBTTagCompound();
                 nmsStack.tag = tag;
@@ -63,41 +125,13 @@ public class ItemStackWithNBT implements ConfigurationSerializable {
             if (!tag.hasKey("display")) {
                 tag.setCompound("display", new NBTTagCompound());
             }
-
-            tag.getCompound("display").setString("Name", lore);
-        }
-    }
-
-    private static final Method nbtloadMethod = lookupNbtLoadMethod();
-    private static final Method nbtWriteMethod = lookupNbtWriteMethod();
-
-    private static Method lookupNbtLoadMethod() {
-        for (Method m : NBTBase.class.getMethods()) {
-            if (Modifier.isStatic(m.getModifiers()) && Modifier.isPublic(m.getModifiers())) {
-                if (m.getReturnType().getName().contains("NBTBase")) {
-                    Class[] paramTypes = m.getParameterTypes();
-                    if (paramTypes != null && paramTypes.length == 1 && paramTypes[0].getName().contains("DataInput")) {
-                        return m;
-                    }
-                }
+            return tag.getCompound("display");
+        } else {
+            if (tag != null && tag.hasKey("display")) {
+                return tag.getCompound("display");
             }
+            return null;
         }
-        throw new IllegalStateException("Lookup NBT Load Method returned null");
-    }
-
-    private static Method lookupNbtWriteMethod() {
-        for (Method m : NBTBase.class.getMethods()) {
-            if (Modifier.isStatic(m.getModifiers()) && Modifier.isPublic(m.getModifiers())) {
-                if (m.getReturnType().equals(Void.TYPE)) {
-                    Class[] paramTypes = m.getParameterTypes();
-                    if (paramTypes != null && paramTypes.length == 2 && paramTypes[0].getName().contains("NBTBase") &&
-                            paramTypes[1].getName().contains("DataOutput")) {
-                        return m;
-                    }
-                }
-            }
-        }
-        throw new IllegalStateException("Lookup NBT Write Method returned null");
     }
 
     /**
@@ -107,15 +141,7 @@ public class ItemStackWithNBT implements ConfigurationSerializable {
         if (nmsStack.tag == null) return null;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dis = new DataOutputStream(baos);
-        try {
-            nbtWriteMethod.invoke(null, nmsStack.tag, dis);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-
+        NBTBase.a(nmsStack.tag, new DataOutputStream(baos));
         return DatatypeConverter.printBase64Binary(baos.toByteArray());
     }
 
@@ -125,17 +151,10 @@ public class ItemStackWithNBT implements ConfigurationSerializable {
     public void setTagBase64(String tagBase64) {
         if (tagBase64 == null) {
             nmsStack.tag = null;
-            return;
-        }
-
-        byte[] nbtData = DatatypeConverter.parseBase64Binary(tagBase64);
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(nbtData));
-        try {
-            nmsStack.tag = (NBTTagCompound) nbtloadMethod.invoke(null, dis);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } else {
+            byte[] nbtData = DatatypeConverter.parseBase64Binary(tagBase64);
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(nbtData));
+            nmsStack.tag = (NBTTagCompound) NBTBase.b(dis);
         }
     }
 
