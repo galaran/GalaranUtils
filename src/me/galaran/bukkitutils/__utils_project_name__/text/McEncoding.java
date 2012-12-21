@@ -1,7 +1,10 @@
 package me.galaran.bukkitutils.__utils_project_name__.text;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.*;
 
 public class McEncoding {
 
@@ -27,5 +30,37 @@ public class McEncoding {
         }
 
         return sb.toString();
+    }
+
+    public static List<String> fixCollection(Collection<String> col) {
+        if (col == null) return null;
+        if (col.isEmpty()) return Collections.emptyList();
+
+        List<String> result = new ArrayList<String>(col.size());
+        for (String element : col) {
+            result.add(fix(element));
+        }
+        return result;
+    }
+
+    public static ItemStack fixItem(ItemStack stack) {
+        if (stack == null) return null;
+        if (!stack.hasItemMeta()) {
+            return stack;
+        }
+
+        ItemMeta meta = stack.getItemMeta();
+        meta.setDisplayName(fix(meta.getDisplayName()));
+        meta.setLore(fixCollection(meta.getLore()));
+        
+        if (meta instanceof BookMeta) {
+            BookMeta book = (BookMeta) meta;
+            book.setAuthor(fix(book.getAuthor()));
+            book.setTitle(fix(book.getTitle()));
+            book.setPages(fixCollection(book.getPages()));
+        }
+
+        stack.setItemMeta(meta);
+        return stack;
     }
 }
