@@ -1,11 +1,16 @@
 package me.galaran.bukkitutils.__utils_project_name__;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ItemUtils {
@@ -63,5 +68,32 @@ public class ItemUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Gives stacks copy to player
+     * @return all stacks fit
+     */
+    @SuppressWarnings("deprecation")
+    public static boolean giveStacks(Player player, boolean dropIfNotFit, Iterable<ItemStack> stacks) {
+        List<ItemStack> stacksCopy = new ArrayList<ItemStack>();
+        for (ItemStack curStack : stacks) {
+            stacksCopy.add(curStack.clone());
+        }
+
+        Inventory inv = player.getInventory();
+        HashMap<Integer, ItemStack> ungiven = inv.addItem(stacksCopy.toArray(new ItemStack[stacksCopy.size()]));
+        player.updateInventory();
+
+        if (ungiven != null && !ungiven.isEmpty()) {
+            if (dropIfNotFit) {
+                Location dropLoc = player.getEyeLocation();
+                for (ItemStack ungivenStack : ungiven.values()) {
+                    dropLoc.getWorld().dropItem(dropLoc, ungivenStack);
+                }
+            }
+            return false;
+        }
+        return true;
     }
 }
