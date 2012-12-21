@@ -7,6 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,5 +96,18 @@ public class ItemUtils {
             return false;
         }
         return true;
+    }
+    
+    public static void addLore(ItemStack stack, String loreLine) {
+        if (stack == null || stack.getType() == Material.AIR) return;
+        
+        ItemMeta meta = stack.getItemMeta();
+        List<String> newLore = new ArrayList<String>();
+        if (meta.hasLore()) {
+            newLore.addAll(meta.getLore());
+        }
+        newLore.add(loreLine);
+        meta.setLore(newLore);
+        stack.setItemMeta(meta);
     }
 }
