@@ -34,7 +34,6 @@ public class McEncoding {
 
     public static List<String> fixCollection(Collection<String> col) {
         if (col == null) return null;
-        if (col.isEmpty()) return Collections.emptyList();
 
         List<String> result = new ArrayList<String>(col.size());
         for (String element : col) {
@@ -43,24 +42,31 @@ public class McEncoding {
         return result;
     }
 
+    /**
+     * @return passed ItemStack
+     */
     public static ItemStack fixItem(ItemStack stack) {
-        if (stack == null) return null;
-        if (!stack.hasItemMeta()) {
-            return stack;
+        if (stack != null && stack.hasItemMeta()) {
+            stack.setItemMeta(fixItemMeta(stack.getItemMeta()));
         }
+        return stack;
+    }
 
-        ItemMeta meta = stack.getItemMeta();
+    /**
+     * @return passed ItemMeta
+     */
+    public static ItemMeta fixItemMeta(ItemMeta meta) {
+        if (meta == null) return null;
+
         meta.setDisplayName(fix(meta.getDisplayName()));
         meta.setLore(fixCollection(meta.getLore()));
-        
+
         if (meta instanceof BookMeta) {
             BookMeta book = (BookMeta) meta;
             book.setAuthor(fix(book.getAuthor()));
             book.setTitle(fix(book.getTitle()));
             book.setPages(fixCollection(book.getPages()));
         }
-
-        stack.setItemMeta(meta);
-        return stack;
+        return meta;
     }
 }
